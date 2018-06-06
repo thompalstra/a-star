@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="./astar.js"></script>
+    <script src="./modules/game.js" type="module"></script>
   </head>
   <body>
     <canvas id="canvas" width=200 height=200 style="background-color: #ddd;"></canvas>
@@ -10,143 +10,58 @@
       var tileWidth = 20;
       var tileHeight = 20;
 
-      var Player = function( x, y ){
-        this.x = x;
-        this.y = y;
-      }
-      Player.prototype.getContext = function(){
-        return this.parent.getContext();
-      }
-      Player.prototype.draw = function(){
-        this.MapCollection.Map.getContext().fillStyle = "orange";
-        this.MapCollection.Map.getContext().fillRect( ( this.x * tileWidth ), ( this.y * tileHeight ), tileHeight, tileWidth );
-      }
-      Player.prototype.move = function( event ){
-        var tileX = parseInt( event.offsetX / tileWidth ).toFixed(0);
-        var tileY = parseInt( event.offsetY / tileHeight ).toFixed(0);
-        if( this.MapCollection.Map.getTile( tileX, tileY ) !== 1 ){
-          this.x = tileX;
-          this.y = tileY;
-        }
-      }
-
-      var Map = function( grid, canvas ){
-        this.grid = grid;
-        this.canvas = canvas;
-        this.ctx = canvas.getContext( "2d" );
-        this.collection = new MapCollection( this );
-        this.renderer = new MapRenderer( this );
-      }
-      var MapCollection = function( map ){
-        this.Map = map;
-        this.objects = [];
-      }
-
-      MapCollection.prototype.addObject = function( obj, x, y ){
-        if( typeof this.objects[x] === "undefined" ){
-          this.objects[x] = [];
-        }
-        if( typeof this.objects[x][y] === "undefined" ){
-          this.objects[x][y] = [];
-        }
-
-        obj.MapCollection = this;
-        this.objects[x][y].push( obj );
-      }
-
-      MapCollection.prototype.getObjects = function( x, y ){
-        if( typeof this.objects[x] !== "undefined" && typeof this.objects[x][y] !== "undefined" ){
-          return this.objects[x][y];
-        }
-        return [];
-      }
-
-      var MapRenderer = function( map ){
-        this.Map = map;
-        this.render.MapRenderer = this;
-      }
-      MapRenderer.prototype.run = function(){
-        this.render.clear();
-        this.render.map();
-        this.render.objects();
-      }
-      MapRenderer.prototype.render = {};
-      MapRenderer.prototype.render.clear = function(){
-        this.MapRenderer.Map.getContext().clearRect(0, 0, 200, 200);
-      }
-      MapRenderer.prototype.render.map = function(){
-        map.walk( function ( tile, tileIndex, rowIndex ) {
-          var x = tileIndex * tileWidth;
-          var y = rowIndex * tileHeight;
-          if( tile == 0 ){
-            map.ctx.rect( x, y, tileWidth, tileHeight );
-            map.ctx.strokeColor = "black";
-            map.ctx.stroke();
-          } else if( tile == 1 ) {
-            map.ctx.fillStyle = "black";
-            map.ctx.fillRect( x, y, tileWidth, tileHeight );
-          } else if( tile == "E" ){
-            map.ctx.fillStyle = "green";
-            map.ctx.fillRect( x, y, tileWidth, tileHeight );
-          } else if( tile == "S" ){
-            map.ctx.fillStyle = "blue";
-            map.ctx.fillRect( x, y, tileWidth, tileHeight );
-          }
-        } )
-      }
-
-      MapRenderer.prototype.render.objects = function(){
-        map.walk( function( tile, tileIndex, rowIndex ) {
-          this.collection.getObjects( rowIndex, tileIndex ).forEach( function( object ) {
-            object.draw();
-          } )
-        } )
-      }
-      Map.prototype.getTile = function( x, y ){
-        if( typeof this.grid[x] !== "undefined" && typeof this.grid[x][y] !== "undefined" ){
-          return this.grid[x][y];
-        }
-        return [];
-      }
-      Map.prototype.getContext = function(){
-        return this.ctx;
-      }
-      Map.prototype.walk = function( callable ){
-        this.grid.forEach( ( row, rowIndex ) => {
-          row.forEach( ( tile, tileIndex ) => {
-            callable.apply( this, [ tile, rowIndex, tileIndex ] );
-          } )
-        } );
-      }
-
-      Map.prototype.tick = function(){
-        map.renderer.run()
-        requestAnimationFrame( map.tick );
-      }
-
-      var grid = [
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 1, 1, 1, 0, 0 ],
-        [ 0, 0, 0, 0, 1, 0, 0, 1, 0, 0 ],
-        [ 0, 0, 0, 1, 1, 0, 0, 1, 1, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 ],
-        [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-      ];
-
-      var map = new Map( grid, canvas );
-      var player = new Player( 0, 0, );
-      map.collection.addObject( player, player.x, player.y );
-
-      map.canvas.addEventListener( "click", function( event ) {
-        player.move( event );
-      } )
+      var tileset = {
+        path: [
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 1, 0, 0, 1, 1, 1, 0, 0 ],
+          [ 0, 0, 0, 0, 1, 0, 0, 1, 0, 0 ],
+          [ 0, 0, 0, 1, 1, 0, 0, 1, 1, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 ],
+          [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+        ],
+        tiles: [
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 3, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 3, 0, 0, 3, 3, 3, 0, 0 ],
+          [ 0, 0, 0, 0, 3, 0, 0, 3, 0, 0 ],
+          [ 0, 0, 0, 3, 3, 0, 0, 3, 3, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0 ],
+          [ 0, 0, 0, 3, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+        ]
+      };
 
       document.addEventListener( "DOMContentLoaded", function( event ) {
-          requestAnimationFrame( map.tick );
+              window.game = new Game( {
+                tileset: tileset,
+                canvas: canvas
+              } );
+
+              window.player = new Player( {
+                pos: {
+                  x: 0, y: 0
+                }
+              } );
+
+              window.simpleMob = new SimpleMob( {
+                pos: {
+                  x: 9, y: 9
+                }
+              } );
+
+              canvas.addEventListener( "click", function( event ) {
+                player.move( event );
+              } );
+
+              game.Engine.Map.add( player );
+              game.Engine.Map.add( simpleMob );
+              requestAnimationFrame( game.tick );
       } );
 
     </script>

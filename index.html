@@ -1,67 +1,79 @@
+<!ODCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <script src="./modules/game.js" type="module"></script>
+    <style>
+      html, body{
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: black;
+      }
+    </style>
   </head>
   <body>
     <canvas id="canvas" width=200 height=200 style="background-color: #ddd;"></canvas>
-
     <script>
 
-      var tileWidth = 20;
-      var tileHeight = 20;
-
-      var tileset = {
-        path: [
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 1, 0, 0, 1, 1, 1, 0, 0 ],
-          [ 0, 0, 0, 0, 1, 0, 0, 1, 0, 0 ],
-          [ 0, 0, 0, 1, 1, 0, 0, 1, 1, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 ],
-          [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-        ],
-        tiles: [
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 3, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 3, 0, 0, 3, 3, 3, 0, 0 ],
-          [ 0, 0, 0, 0, 3, 0, 0, 3, 0, 0 ],
-          [ 0, 0, 0, 3, 3, 0, 0, 3, 3, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0 ],
-          [ 0, 0, 0, 3, 0, 0, 0, 0, 0, 0 ],
-          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-        ]
-      };
+      var map = [
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 3, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 3, 3, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 0, 3, 3, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 0, 0, 3, 3, 1, 1, 1, 1, 1, 1 ],
+        [ 0, 0, 0, 3, 1, 1, 1, 1, 1, 1 ],
+      ];
 
       document.addEventListener( "DOMContentLoaded", function( event ) {
-              window.game = new Game( {
-                tileset: tileset,
-                canvas: canvas
-              } );
 
-              window.player = new Player( {
-                pos: {
-                  x: 0, y: 0
-                }
-              } );
+        //canvas.height = Math.min( window.innerWidth, window.innerHeight ) ;
+        //canvas.width = Math.min( window.innerWidth, window.innerHeight ) ;
 
-              window.simpleMob = new SimpleMob( {
-                pos: {
-                  x: 9, y: 9
-                }
-              } );
+          var tileSet = new TileSet( map );
 
-              canvas.addEventListener( "click", function( event ) {
-                player.move( event );
-              } );
+          window.game = new Game( {
+            TileSet: tileSet,
+            canvas: canvas
+          } );
 
-              game.Engine.Map.add( player );
-              game.Engine.Map.add( simpleMob );
-              requestAnimationFrame( game.tick );
+          window.player = new Player( {
+            pos: {
+              x: 0, y: 0
+            }
+          } );
+          window.simpleMob = new SimpleMob( {
+            pos: {
+              x: 9, y: 9
+            }
+          } );
+          canvas.addEventListener( "click", function( event ) {
+            player.move( event );
+          } );
+
+          game.Engine.Map.addTeam( new Team( {
+            id: 1,
+            name: "Player team"
+          } ) );
+          game.Engine.Map.addTeam( new Team( {
+            id: 2,
+            name: "Simple Mob Team"
+          } ) );
+
+
+
+          game.Engine.Map.addObject( player );
+          game.Engine.Map.addObject( simpleMob );
+
+          player.setTeam( 1 );
+          simpleMob.setTeam( 2 );
+
+          requestAnimationFrame( game.tick );
       } );
 
     </script>

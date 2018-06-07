@@ -16,5 +16,11 @@ export class GameObject{
   getPosition(){
     return this.pos;
   }
+  setTeam( id ){
+    this.team = this.Map.getTeam( id );
+  }
+  getTeam(){
+    return this.team;
+  }
 }
 window.GameObject = GameObject;

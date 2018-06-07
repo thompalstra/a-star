@@ -23,7 +23,7 @@ export class SimpleMob extends GameObject{
 
   draw(){
     this.Map.ctx.fillStyle = "red";
-    this.Map.ctx.fillRect( ( this.pos.x * tileWidth ), ( this.pos.y * tileHeight ), tileHeight, tileWidth );
+    this.Map.ctx.fillRect( ( this.pos.x * TileWidth ), ( this.pos.y * TileHeight ), TileHeight, TileWidth );
   }
   updatePosition(){
     if( this.tick >= ( 1 /  this.speed ) ){
@@ -44,7 +44,7 @@ export class SimpleMob extends GameObject{
     this.pos.x = parseInt( this.pos.x );
     this.pos.y = parseInt( this.pos.y );
 
-    this.path = PathTracking( this.Map.tileset.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] );
+    this.path = PathTracking( this.Map.TileSet.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] );
     this.path.shift();
 
     if( this.path.length > this.followRadius ){
@@ -57,7 +57,7 @@ export class SimpleMob extends GameObject{
     this.pos.x = parseInt( this.pos.x );
     this.pos.y = parseInt( this.pos.y );
 
-    if( PathTracking( this.Map.tileset.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] ).length <= this.wakeRadius ){
+    if( PathTracking( this.Map.TileSet.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] ).length <= this.wakeRadius ){
       this.awake = true;
     } else {
       if( this.awake ){

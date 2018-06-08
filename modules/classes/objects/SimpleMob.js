@@ -3,80 +3,147 @@ export class SimpleMob extends GameObject{
   constructor( options ){
     super();
     this.path = [];
-    this.pos.x = 0;
-    this.pos.y = 0;
     this.automated = true;
-
-    this.followRadius = 2;
-    this.wakeRadius = 10;
-    this.awake = false;
-    this.speed = 0.25;
-    this.tick = 1;
-    this.sleepTick = 1;
-    this.outOfRangeTick = 0;
-    this.outOfRangeTickMax = 5;
+    this.fillStyle = "red";
+    this.targetInRange = false;
 
     for( var i in options ){
       this[i] = options[i];
     }
+    this.target = false;
+    this.forcedTarget = false;
+    this.targetRange = 2;
+    this.visibilityRange = 5;
+    this.speed = .10;
   }
 
   draw(){
-    this.Map.ctx.fillStyle = "red";
+    this.Map.ctx.fillStyle = this.fillStyle;
     this.Map.ctx.fillRect( ( this.pos.x * TileWidth ), ( this.pos.y * TileHeight ), TileHeight, TileWidth );
   }
-  updatePosition(){
-    if( this.tick >= ( 1 /  this.speed ) ){
-      if( this.path.length > 0 ){
-        this.pos = {
-          x: this.path[0][0],
-          y: this.path[0][1]
-        };
-        this.path.shift();
-      }
-      this.tick = 1;
-    }
-    this.tick++;
-  }
-  move( event ){
-    var tileX = parseInt( player.pos.x );
-    var tileY = parseInt( player.pos.y );
-    this.pos.x = parseInt( this.pos.x );
-    this.pos.y = parseInt( this.pos.y );
 
-    this.path = PathTracking( this.Map.TileSet.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] );
+  setTarget( target ){
+    this.target = target;
+  }
+  getTarget(){
+    if( this.forcedTarget !== false ){
+      return this.forcedTarget;
+    } else if( this.target !== false ){
+      return this.target;
+    }
+    return false;
+  }
+  updateTargetCoords(){
+    this.path = PathTracking(
+      this.Map.TileSet.path,
+      [ parseInt( this.pos.x ), parseInt( this.pos.y ) ],
+      [ parseInt( this.target.pos.x ), parseInt( this.target.pos.y ) ] );
+
+    this.path.pop();
     this.path.shift();
 
-    if( this.path.length > this.followRadius ){
-      this.path = this.path.slice( 0, this.followRadius );
-    }
   }
-  checkEnvironment(){
-    var tileX = parseInt( player.pos.x );
-    var tileY = parseInt( player.pos.y );
-    this.pos.x = parseInt( this.pos.x );
-    this.pos.y = parseInt( this.pos.y );
+  assessTargets( targets ){
+    targets.forEach( ( target ) => {
+      if( target !== this ){
+        if( this.Team.getStanding( target.Team.id ) == -1 ){
+          if( this.getTarget() === false ){
+            this.target = target;
+          } else if( this.assessThreats( this.getTarget(), target ) < 0 ){
+            this.target = target;
+          }
+        }
+      }
+    } );
+  }
+  assessThreats( a, b ){
+    // when > 0, a is a great threat
+    // when < 0, b is a great threat
+    // when equal, a and b are of equal threat
+    var score = 0;
 
-    if( PathTracking( this.Map.TileSet.path, [ this.pos.x, this.pos.y ], [ tileX, tileY ] ).length <= this.wakeRadius ){
-      this.awake = true;
-    } else {
-      if( this.awake ){
-        this.outOfRange = true;
-        this.outOfRangeTick++;
-        if( this.outOfRangeTick == this.outOfRangeTickMax ){
-          this.awake = false;
-          this.outOfRangeTick = 0;
+    score += ( a.getArmorScore() >= b.getArmorScore() ) ? 0 : -1;
+    score += ( a.getHealthScore() >= b.getHealthScore() ) ? 0 : -1;
+    score += ( a.getDangerLevel() >= b.getDangerLevel() ) ? 0 : -1;
+
+    return ( score >= 0 ? 1 : -1 );
+  }
+  checkVisibility(){
+    var r = this.visibilityRange;
+
+    var start = { x: this.pos.x - r, y: this.pos.y - r };
+    var end = { x: this.pos.x + r, y: this.pos.y + r };
+    var current = { x: start.x, y: start.y };
+    var check = true;
+    var results = [];
+
+    while( check ){
+      this.Map.getObject( current.x, current.y ).forEach( ( obj ) => {
+        if( obj !== this ){ results.push( obj ) }
+      } )
+
+      if( current.x < end.x ){
+        current.x++;
+      } else {
+        if( current.y < end.y ){
+          current.y++;
+          current.x = start.x;
+        } else {
+          break;
         }
       }
     }
-  }
-  checkState(){
-    this.checkEnvironment();
 
-    if( this.awake ){
-      this.updatePosition();
-      this.move();
+    if( results.length > 0 ){
+      this.assessTargets( results );
     }
+  }
+  checkTargetRange(){
+    var r = this.targetRange;
+
+    var start = {
+      x: parseInt( this.pos.x - r ),
+      y: parseInt( this.pos.y - r )
+    };
+    var end = {
+      x: parseInt( this.pos.x + r ),
+      y: parseInt( this.pos.y + r )
+    };
+
+    var target = {
+      x: parseInt( this.getTarget().pos.x ),
+      y: parseInt( this.getTarget().pos.y )
+    }
+
+
+    // check if target out of range
+    if(
+      ( target.x >= start.x && target.x <= end.x ) &&
+      ( target.y >= start.y && target.y <= end.y )
+    ){
+      this.path = [];
+      this.targetInRange = true;
+    } else {
+      this.targetInRange = false;
+    }
+  }
+  updateTarget(){
+    this.checkVisibility();
+    if( this.getTarget() ){
+      this.checkTargetRange();
+      if( !this.targetInRange ){
+        this.updateTargetCoords();
+      }
+    }
+  }
+  updatePosition(){
+    if( this.path.length > 0 ){
+      this.updatePositionCoords();
+    }
+  }
+  update(){
+    this.updateTarget();
+    this.updatePosition();
   }
 }
 window.SimpleMob = SimpleMob;

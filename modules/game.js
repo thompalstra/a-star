@@ -20,20 +20,20 @@ window.TileWidth = 0;
 window.Game = function( options ){
   this.Engine = new Engine( new Map( options.TileSet, options.canvas ) );
 };
-window.Game.prototype.Draw = function(){
+window.Game.prototype.draw = function(){
   this.Engine.Map.MapRenderer.run();
+}
+window.Game.prototype.update = function(){
+  this.Engine.Map.update();
 }
 window.Game.prototype.tick = function(  ){
   // execute all logics
-  // console.log( game.Engine.Map.MapCollection.objects );
-  game.Engine.Map.MapCollection.objects.forEach( ( o ) => {
-    // console.log( o );
-  } )
+  game.update();
 
-  // execute all drawing
-  game.Draw();
+  // execute all draw
+  game.draw();
 
-  setTimeout(function() {
-    window.requestAnimationFrame( game.tick );
-  }, 1000 / 30);
+  setTimeout( function( e ) {
+    requestAnimationFrame( game.tick );
+  }, 1000 / 50 );
 }

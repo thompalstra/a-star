@@ -18,7 +18,7 @@ export class TileCollection{
     if( tileType ){
       return tileType;
     } else {
-      throw Error(`Undefined tile: ${type}`);
+      throw Error(`Undefined tile: type '${type}'`);
     }
   }
 }

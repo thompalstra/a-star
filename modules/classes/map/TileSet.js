@@ -15,7 +15,7 @@ export class TileSet{
           this.tiles[ tileIndex ][ rowIndex ]
           this.path[ tileIndex ][ rowIndex ] = [];
         }
-        this.tiles[ tileIndex ][ rowIndex ] = TileCollection.findByType( tile );
+        this.tiles[ tileIndex ][ rowIndex ] = new Tile( { type: tile, pos: { x: tileIndex, y: rowIndex } }, this );
         this.path[ tileIndex ][ rowIndex ] = this.tiles[ tileIndex ][ rowIndex ].passable ? 0 : 1;
       } );
     } );

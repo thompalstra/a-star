@@ -23,8 +23,9 @@ function PathTracking(world, pathStart, pathEnd)
 	// which heuristic should we use?
 	// default: no diagonals (Manhattan)
 	var distanceFunction = ManhattanDistance;
-	var findNeighbours = function(){}; // empty
-
+	// var findNeighbours = function(){}; // empty
+	var distanceFunction = EuclideanDistance;
+	var findNeighbours = DiagonalNeighbours;
 	/*
 
 	// alternate heuristics, depending on your game:
@@ -147,7 +148,7 @@ function PathTracking(world, pathStart, pathEnd)
 	{
 		return ((world[x] != null) &&
 			(world[x][y] != null) &&
-			(world[x][y] <= maxWalkableTileNum));
+			(world[x][y] <= maxWalkableTileNum) );
 	};
 
 	// Node function, returns a new object with Node properties

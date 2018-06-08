@@ -1,30 +1,40 @@
 export class Tile{
 
-  constructor(){
-    this.path = [];
-    this.pos.x = 0;
-    this.pos.y = 0;
-  }
+  constructor( options, TileSet ){
+    this.TileSet = TileSet;
+    this.pos = {
+      x: 0,
+      y: 0
+    };
+    this.type = 0;
 
-  static draw( ctx, tile, x, y ){
-
-    var posX = ( x * TileWidth );
-    var posY = ( y * TileHeight );
-
-    if( typeof tile["stroke"] !== "undefined" ){
-      ctx.beginPath();
-      ctx.rect( posX, posY, TileWidth, TileHeight );
-      ctx.strokeColor = tile["stroke"];
-      ctx.stroke();
-      ctx.closePath();
+    for( let i in options ){
+      this[ i ] = options[ i ];
     }
 
-    if( typeof tile["fill"] !== "undefined" ){
-      ctx.beginPath();
-      ctx.rect( posX, posY, TileWidth, TileHeight );
-      ctx.fillStyle = tile["fill"];
-      ctx.fill();
-      ctx.closePath();
+    var type = TileCollection.findByType( this.type );
+
+    for( let i in type ){
+      this[ i ] = type[ i ];
+    }
+  }
+
+  draw(){
+    // console.log( this["fill"] );
+    if( typeof this["stroke"] !== "undefined" ){
+      this.TileSet.Map.ctx.beginPath();
+      this.TileSet.Map.ctx.rect( this.pos.x * TileHeight, this.pos.y * TileHeight, TileWidth, TileHeight );
+      this.TileSet.Map.ctx.strokeColor = this["stroke"];
+      this.TileSet.Map.ctx.stroke();
+      this.TileSet.Map.ctx.closePath();
+    }
+
+    if( typeof this["fill"] !== "undefined" ){
+      this.TileSet.Map.ctx.beginPath();
+      this.TileSet.Map.ctx.rect( this.pos.x * TileHeight, this.pos.y * TileHeight, TileWidth, TileHeight );
+      this.TileSet.Map.ctx.fillStyle = this["fill"];
+      this.TileSet.Map.ctx.fill();
+      this.TileSet.Map.ctx.closePath();
     }
   }
 }

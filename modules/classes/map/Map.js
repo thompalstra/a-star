@@ -1,5 +1,6 @@
 var Map = function( tileSet, canvas ){
   this.TileSet = tileSet;
+  this.TileSet.Map = this;
   this.canvas = canvas;
 
   TileHeight = this.canvas.height / this.TileSet.tiles.length;
@@ -8,9 +9,11 @@ var Map = function( tileSet, canvas ){
   this.ctx = canvas.getContext( "2d" );
   this.MapCollection = new MapCollection( this );
   this.MapRenderer = new MapRenderer( this );
-
-
-
+}
+Map.prototype.update = function(){
+  this.MapCollection.objects.forEach( ( obj ) => {
+    obj.update();
+  } )
 }
 Map.prototype.getTile = function( x, y ){
   if( typeof this.TileSet.tiles[x] !== "undefined" && typeof this.TileSet.tiles[x][y] !== "undefined" ){
@@ -28,10 +31,10 @@ Map.prototype.getContext = function(){
   return this.ctx;
 }
 Map.prototype.addTeam = function( team ){
-  this.MapCollection.teams.push( team );
+  this.MapCollection.teams[ team.id ] = team;
 }
-Map.prototype.getTeam = function( i ){
-  return this.MapCollection.teams[ i ];
+Map.prototype.getTeam = function( teamId ){
+  return this.MapCollection.teams[ teamId ];
 }
 Map.prototype.addObject = function( obj ){
 
@@ -50,12 +53,29 @@ Map.prototype.addObject = function( obj ){
     throw Error("Object is not of type `GameObject`");
   }
 }
-Map.prototype.get = function( x, y ){
-  console.log( x, y );
-  if( typeof this.MapCollection.objects[ x ] !== "undefined" && typeof this.MapCollection.objects[ x ][ y ] !== "undefined" ){
-    return this.MapCollection.objects[ x ][ y ]
-  }
-  return [];
+Map.prototype.getObject = function( tileX, tileY ){
+  var objects = [];
+  this.MapCollection.objects.forEach( ( obj ) => {
+
+    if( obj.pos.x == tileX && obj.pos.y == tileY ){
+      objects.push( obj );
+    }
+
+    // if(
+    //   ( obj.pos.x >= tileX && obj.pos.x <= ( tileX + TileWidth ) ) &&
+    //   ( obj.pos.y >= tileY && obj.pos.y <= ( tileY + TileHeight ) )
+    // ) {
+    //     objects.push( obj );
+    // }
+  } );
+
+  return objects;
+}
+Map.prototype.getCoords = function( offsetX, offsetY ){
+  return {
+    x: parseInt( offsetX / TileWidth ).toFixed(0),
+    y: parseInt( offsetY / TileHeight ).toFixed(0)
+  };
 }
 
 export var Map = window.Map = Map;

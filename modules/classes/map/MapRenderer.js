@@ -15,7 +15,7 @@ MapRenderer.prototype.render.clear = function(){
 MapRenderer.prototype.render.map = function(){
   this.MapRenderer.Map.TileSet.tiles.forEach( ( row, ri ) => {
     row.forEach( ( Tile, ti ) => {
-      // Tile.draw();
+      Tile.draw();
     } );
   } );
 }

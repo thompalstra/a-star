@@ -60,17 +60,29 @@ Map.prototype.getObject = function( tileX, tileY ){
     if( obj.pos.x == tileX && obj.pos.y == tileY ){
       objects.push( obj );
     }
-
-    // if(
-    //   ( obj.pos.x >= tileX && obj.pos.x <= ( tileX + TileWidth ) ) &&
-    //   ( obj.pos.y >= tileY && obj.pos.y <= ( tileY + TileHeight ) )
-    // ) {
-    //     objects.push( obj );
-    // }
   } );
 
   return objects;
 }
+Map.prototype.kill = function( source, target ){
+  this.MapCollection.objects.find( ( obj, index ) => {
+    if( obj === target && !obj.dead ){
+      obj.dead = true;
+      console.log( `${source.name} killed ${target.name} with ${source.weapon.name}` );
+    }
+  } )
+}
+
+Map.prototype.damage = function( source, target, weapon, damage ){
+  target._protected.damages.push( {
+    damagedBy: source,
+    weaponUsed: weapon,
+    damageDealt: damage
+  } );
+  target.lastDamagedBy = source;
+  target.health -= damage;
+}
+
 Map.prototype.getCoords = function( offsetX, offsetY ){
   return {
     x: parseInt( offsetX / TileWidth ).toFixed(0),

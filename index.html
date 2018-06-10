@@ -31,10 +31,7 @@
       ];
 
       document.addEventListener( "DOMContentLoaded", function( event ) {
-
-        //canvas.height = Math.min( window.innerWidth, window.innerHeight ) ;
-        //canvas.width = Math.min( window.innerWidth, window.innerHeight ) ;
-
+        
           var tileSet = new TileSet( map );
 
           window.game = new Game( {
@@ -42,9 +39,22 @@
             canvas: canvas
           } );
 
-          window.player = new Player( { pos: { x: 0, y: 0 } } );
-          window.simpleMob = new SimpleMob( { pos: { x: 9, y: 9 } } );
-          window.simpleMobEnemy = new SimpleMob( { pos: { x: 6, y: 6 }, fillStyle: "purple" } );
+          window.player = new Player( {
+            name: "Player",
+            pos: { x: 0, y: 0 },
+            weapon: { name: "RPG", speed: 10, damage: 30, range: 3 }
+          } );
+          window.simpleMob = new SimpleMob( {
+            name: "Simple Mob",
+            pos: { x: 9, y: 9 },
+            weapon: { name: "Glock", speed: 1, damage: 1, range: 2 }
+          } );
+          window.simpleMobEnemy = new SimpleMob( {
+            name: "Simple Mob Enemy",
+            pos: { x: 6, y: 6 },
+            weapon: { name: "Desert Eagle", speed: 1, damage: 5, range: 2 },
+            fillStyle: "purple"
+          } );
 
           canvas.addEventListener( "click", function( event ) {
             var coords = game.Engine.Map.getCoords( event.offsetX, event.offsetY );
@@ -61,13 +71,17 @@
           game.Engine.Map.addTeam( new Team( {
             id: 2,
             name: "Simple Mob Team",
-            standings: { 1: -1, 3: -1 } // alwayys 'hate' the player factions
+            standings: { 1: -1, 3: -1 }, // alwayys 'hate' the player factions
+            weapon: {
+              speed: 1,
+              damage: 1
+            }
           } ) );
 
           game.Engine.Map.addTeam( new Team( {
             id: 3,
             name: "Simple Mob Enemy Team",
-            standings: { 1: -1, 2: -1 } // alwayys 'hate' the player factions
+            standings: { 1: -1, 2: -1 }, // alwayys 'hate' the player factions
 
           } ) );
 

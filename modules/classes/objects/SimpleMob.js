@@ -3,22 +3,31 @@ export class SimpleMob extends GameObject{
   constructor( options ){
     super();
     this.path = [];
+    this.name = "Simple Mob";
+    this.health = 100;
     this.automated = true;
     this.fillStyle = "red";
     this.targetInRange = false;
 
+    this.target = false;
+    this.forcedTarget = false;
+    this.visibilityRange = 5;
+    this.speed = .10;
+
+    this.weapon = {
+      name: "Glock",
+      speed: 1,
+      damage: 1,
+      range: 2,
+    };
+
     for( var i in options ){
       this[i] = options[i];
     }
-    this.target = false;
-    this.forcedTarget = false;
-    this.targetRange = 2;
-    this.visibilityRange = 5;
-    this.speed = .10;
   }
 
   draw(){
-    this.Map.ctx.fillStyle = this.fillStyle;
+    this.Map.ctx.fillStyle = this.dead ? "#333" : this.fillStyle;
     this.Map.ctx.fillRect( ( this.pos.x * TileWidth ), ( this.pos.y * TileHeight ), TileHeight, TileWidth );
   }
 
@@ -26,9 +35,9 @@ export class SimpleMob extends GameObject{
     this.target = target;
   }
   getTarget(){
-    if( this.forcedTarget !== false ){
+    if( this.forcedTarget !== false && !this.forcedTarget.dead ){
       return this.forcedTarget;
-    } else if( this.target !== false ){
+    } else if( this.target !== false && !this.target.dead ){
       return this.target;
     }
     return false;
@@ -79,7 +88,7 @@ export class SimpleMob extends GameObject{
 
     while( check ){
       this.Map.getObject( current.x, current.y ).forEach( ( obj ) => {
-        if( obj !== this ){ results.push( obj ) }
+        if( obj !== this && !obj.dead ){ results.push( obj ) }
       } )
 
       if( current.x < end.x ){
@@ -98,41 +107,15 @@ export class SimpleMob extends GameObject{
       this.assessTargets( results );
     }
   }
-  checkTargetRange(){
-    var r = this.targetRange;
 
-    var start = {
-      x: parseInt( this.pos.x - r ),
-      y: parseInt( this.pos.y - r )
-    };
-    var end = {
-      x: parseInt( this.pos.x + r ),
-      y: parseInt( this.pos.y + r )
-    };
-
-    var target = {
-      x: parseInt( this.getTarget().pos.x ),
-      y: parseInt( this.getTarget().pos.y )
-    }
-
-
-    // check if target out of range
-    if(
-      ( target.x >= start.x && target.x <= end.x ) &&
-      ( target.y >= start.y && target.y <= end.y )
-    ){
-      this.path = [];
-      this.targetInRange = true;
-    } else {
-      this.targetInRange = false;
-    }
-  }
   updateTarget(){
     this.checkVisibility();
     if( this.getTarget() ){
       this.checkTargetRange();
       if( !this.targetInRange ){
         this.updateTargetCoords();
+      } else {
+        this.attackTarget();
       }
     }
   }
@@ -142,8 +125,10 @@ export class SimpleMob extends GameObject{
     }
   }
   update(){
-    this.updateTarget();
-    this.updatePosition();
+    if( !this.dead ){
+      this.updateTarget();
+      this.updatePosition();
+    }
   }
 }
 window.SimpleMob = SimpleMob;

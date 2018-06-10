@@ -7,7 +7,7 @@ export class GameObject{
     };
 
     this.data = {
-      health: 100,
+      // health: 100,
       armor: [
         10, // head
         10, // torso
@@ -16,6 +16,24 @@ export class GameObject{
       ],
       dangerLevel: 0,
     };
+    this.dead = false;
+    this._protected = {
+      health: 100,
+      damages: []
+    };
+
+    Object.defineProperty( this, "health", {
+      get: function(){
+        return this._protected.health;
+      },
+      set: function( value ){
+        if( value <= 0 ){
+          this.Map.kill( this, this.lastDamagedBy );
+        } else {
+          this._protected.health = value;
+        }
+      }
+    } );
 
     for( var i in data ){
       this[i] = data[i];
@@ -56,29 +74,15 @@ export class GameObject{
     var diffX = Math.abs( parseFloat( currentX - pathX ).toPrecision( 12 ) );
     var diffY = Math.abs( parseFloat(currentY - pathX ).toPrecision( 12 ) );
 
-    // 
-    // console.log( ( diffX, diffY ), diffX <= speed, diffY <= speed );
-    //
-    // if( currentY == pathY || diffY <= speed ){
-    //   currentY = ( parseFloat( pathY ).toPrecision( 12 ) );
-    // }
-    // if( currentX == pathX || diffX <= speed ){
-    //   currentX = ( parseFloat( pathX ).toPrecision( 12 ) );
-    // }
-
     if( currentX < pathX ){
-      // newX = newX + speed;
       newX = ( parseFloat( newX + speed ).toPrecision( 12 ) );
     } else if( currentX > pathX ){
-      // newX = newX - speed;
       newX = ( parseFloat( newX - speed ).toPrecision( 12 ) );
     }
 
     if( currentY < pathY ){
-      // newY = newY + speed;
       newY = ( parseFloat( newY + speed ).toPrecision( 12 ) );
     } else if( currentY > pathY ){
-      // newY = newY - speed;
       newY = ( parseFloat( newY - speed ).toPrecision( 12 ) );
     }
 
@@ -86,6 +90,40 @@ export class GameObject{
       x: parseFloat( newX ).toPrecision( 12 ),
       y: parseFloat( newY ).toPrecision( 12 )
     };
+  }
+  checkTargetRange(){
+    // var r = this.targetRange;
+    var r = this.weapon.range;
+
+    var start = {
+      x: parseInt( this.pos.x - r ),
+      y: parseInt( this.pos.y - r )
+    };
+    var end = {
+      x: parseInt( this.pos.x + r ),
+      y: parseInt( this.pos.y + r )
+    };
+
+    var target = {
+      x: parseInt( this.getTarget().pos.x ),
+      y: parseInt( this.getTarget().pos.y )
+    }
+    if(
+      ( target.x >= start.x && target.x <= end.x ) &&
+      ( target.y >= start.y && target.y <= end.y )
+    ){
+      this.path = [];
+      this.targetInRange = true;
+    } else {
+      this.targetInRange = false;
+    }
+  }
+  attackTarget(){
+    if( this == player ){
+      console.log( this.getTarget(), this, this.weapon.name, this.weapon.damage );
+      
+    }
+    this.Map.damage( this.getTarget(), this, this.weapon.name, this.weapon.damage );
   }
 }
 window.GameObject = GameObject;

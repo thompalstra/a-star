@@ -26,7 +26,7 @@ export class Player extends GameObject{
   draw(){
     this.Map.ctx.beginPath();
     this.Map.ctx.rect( this.pos.x * TileWidth, this.pos.y * TileHeight, TileWidth, TileHeight );
-    this.Map.ctx.fillStyle = "orange";
+    this.Map.ctx.fillStyle = this.dead ? "#333" : "orange";
     this.Map.ctx.fill();
     this.Map.ctx.closePath();
   }
@@ -45,11 +45,18 @@ export class Player extends GameObject{
       this.Map.TileSet.path,
       [ parseInt( this.pos.x ), parseInt( this.pos.y ) ],
       [ parseInt( this.target.pos.x ), parseInt( this.target.pos.y ) ] );
-    this.path.shift();
+    if( this.path.length > 1 ){
+      this.path.shift();
+    }
   }
   updateTarget(){
-    if( this.target ){
-      this.updateTargetCoords();
+    if( this.getTarget() ){
+      this.checkTargetRange();
+      if( !this.targetInRange ){
+        this.updateTargetCoords();
+      } else {
+        this.attackTarget();
+      }
     }
   }
   updatePosition(){
